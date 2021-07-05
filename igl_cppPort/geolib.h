@@ -1,4 +1,5 @@
 #pragma once
+
 #include <igl/adjacency_list.h>
 #include <igl/barycenter.h>
 #include <igl/boundary_loop.h>
