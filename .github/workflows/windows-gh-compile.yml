@@ -24,7 +24,8 @@ jobs:
  
     - name: Install packages and dependencies
       run: |
-        vcpkg install ligigl eigen3
+        bootstrap-vcpkg
+        vcpkg install eigen3 libigl
         vcpkg integrate install
         nuget install Grasshopper
         
