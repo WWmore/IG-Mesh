@@ -23,6 +23,7 @@ jobs:
 #         set ILink_LibraryPath="./external/libigl/include;./external/eigen"
  
     - name: Vcpkg
+      shell: powershell
       run: |
         vcpkg install ligigl eigen3
         vcpkg integrate install
