@@ -16,12 +16,6 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
       
-    - name: Add NuGet to PATH
-      uses: nuget/setup-nuget@v1
-  
-    - name: Install dependencies
-      run: nuget install Grasshopper -OutputDirectory ./lib/GH -source https://api.nuget.org/v3/index.json
-      
 #     - name: Download dependency lib. LibIGL, Eigen
 #       run: |
 #         git clone https://github.com/libigl/libigl.git ./external/libigl
@@ -32,7 +26,13 @@ jobs:
       run: |
         vcpkg install ligigl eigen3
         vcpkg integrate install
-          
+        
+    - name: Add NuGet to PATH
+      uses: nuget/setup-nuget@v1
+  
+    - name: Install dependencies from NuGet
+      run: nuget install Grasshopper -OutputDirectory ./lib/GH -source https://api.nuget.org/v3/index.json
+      
     - name: Build
       run: msbuild
 #       run: msbuild /p:IncludePath="./external/libigl/include"
