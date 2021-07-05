@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: [ workflow-test ]
+    branches: [ workflow_test ]
   pull_request:
     branches: [ master ]
 
@@ -22,11 +22,11 @@ jobs:
     - name: Install dependencies
       run: nuget install Grasshopper -OutputDirectory ./lib/GH -source https://api.nuget.org/v3/index.json
       
-    - name: Download dependency lib. LibIGL, Eigen
-      run: |
-        git clone https://github.com/libigl/libigl.git ./external/libigl
-        git clone https://gitlab.com/libeigen/eigen.git ./external/eigen
-        set ILink_LibraryPath="./external/libigl/include;./external/eigen"
+#     - name: Download dependency lib. LibIGL, Eigen
+#       run: |
+#         git clone https://github.com/libigl/libigl.git ./external/libigl
+#         git clone https://gitlab.com/libeigen/eigen.git ./external/eigen
+#         set ILink_LibraryPath="./external/libigl/include;./external/eigen"
  
     - name: Vcpkg
       run: |
