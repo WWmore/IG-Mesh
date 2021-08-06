@@ -6,15 +6,15 @@ using Rhino.Geometry;
 
 namespace igl_GrassHopper
 {
-    public class IGL_adjacentList : GH_Component
+    public class iglGH_perVertFaceNormal : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public IGL_adjacentList()
-          : base("IGL_AdjacencyList", "iglAdjList",
-              "compute the adjacency list of the given mesh.",
-              "IGL", "mesh")
+        public iglGH_perVertFaceNormal()
+          : base("per_vertex_and_face_normal", "perVertFaceN",
+              "compute the mesh normals per vertex and face.",
+              "IGL", "Mesh")
         {
         }
 
@@ -31,8 +31,8 @@ namespace igl_GrassHopper
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Adjacency Idices", "A", "the adjacency list of the input mesh", GH_ParamAccess.tree);
-            pManager.AddPointParameter("Adjacency Vertices", "P", "the adjacency vertices of the input mesh", GH_ParamAccess.tree);
+            pManager.AddVectorParameter("Vertex Normals", "VN", "vertex-based normals of the mesh", GH_ParamAccess.list);
+            pManager.AddVectorParameter("Face Normals", "FN", "face-based normals of the mesh", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -45,26 +45,19 @@ namespace igl_GrassHopper
             if (!DA.GetData(0, ref mesh)) { return; }
             if (!mesh.IsValid) { return; }
 
-            // call the cpp function to solve the adjacency list
-            var res = IGLRhinoCommon.Utils.getAdjacencyLst(ref mesh);
+            // call the cpp func
+            List<Vector3f> VN, FN;
+            IGLRhinoCommon.Utils.getPerVertFaceNormal(in mesh, out VN, out FN);
 
-            // construct the index & pt tree from the adjacency list
-            Grasshopper.DataTree<int> treeArray = new Grasshopper.DataTree<int>();
-            Grasshopper.DataTree<Point3d> ptArray = new Grasshopper.DataTree<Point3d>();
-            for (int i = 0; i < res.Count; i++)
-            {
-                var path = new Grasshopper.Kernel.Data.GH_Path(i);
-                treeArray.AddRange(res[i], path);
+            Grasshopper.DataTree<Vector3f> VNArray = new Grasshopper.DataTree<Vector3f>();
+            Grasshopper.DataTree<Vector3f> FNArray = new Grasshopper.DataTree<Vector3f>();
 
-                foreach (var id in res[i])
-                {
-                    ptArray.Add(mesh.Vertices[id], path);
-                }
-            }
+            VNArray.AddRange(VN, new Grasshopper.Kernel.Data.GH_Path(0));
+            FNArray.AddRange(FN, new Grasshopper.Kernel.Data.GH_Path(0));
 
-            // assign to the output
-            DA.SetDataTree(0, treeArray);
-            DA.SetDataTree(1, ptArray);
+            // set the res on component
+            DA.SetDataTree(0, VNArray);
+            DA.SetDataTree(1, FNArray);
         }
 
         /// <summary>
@@ -85,7 +78,7 @@ namespace igl_GrassHopper
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("911ef079-7033-43b6-ad57-1d385c5b8406"); }
+            get { return new Guid("EA88C7DD-9DD8-4EAB-89FE-8A79A5D63DF6"); }
         }
     }
 }

@@ -7,7 +7,7 @@ using IGLRhinoCommon;
 
 namespace ghIGL
 {
-    public class iglGH_simpleAdd: GH_Component
+    public class iglGH_simpleAdd : GH_Component
     {
         /// <summary>
         /// Each implementation of GH_Component must provide a public 
@@ -73,27 +73,7 @@ namespace ghIGL
             if (!DA.GetData(0, ref x)) return;
             if (!DA.GetData(1, ref y)) return;
 
-            //// We should now validate the data and warn the user if invalid data is supplied.
-            //if (radius0 < 0.0)
-            //{
-            //    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Inner radius must be bigger than or equal to zero");
-            //    return;
-            //}
-            //if (radius1 <= radius0)
-            //{
-            //    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Outer radius must be bigger than the inner radius");
-            //    return;
-            //}
-            //if (turns <= 0)
-            //{
-            //    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Spiral turn count must be bigger than or equal to one");
-            //    return;
-            //}
-
-            // We're set to create the spiral now. To keep the size of the SolveInstance() method small, 
-            // The actual functionality will be in a different method:
-            //Curve spiral = CreateSpiral(plane, radius0, radius1, turns);
-            var res = IGLRhinoCommon.Utils.Sum(x, y);
+            var res = IGLRhinoCommon.Utils.Sum(x, y + 1);
 
             // Finally assign the spiral to the output parameter.
             DA.SetData(0, res);

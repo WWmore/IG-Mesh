@@ -7,7 +7,7 @@
 #include <igl/slice_into.h>
 #include <igl/unique.h>
 
-void GeoLib::solveScalarField(const MatrixXd& V, const MatrixXi& F,
+void GeoLib::solveScalarField(const MatrixXf& V, const MatrixXi& F,
                               const VectorXi& con_idx,
                               const VectorXd& con_value, VectorXd& meshScalar) {
   // boundary edges
@@ -44,7 +44,7 @@ void GeoLib::solveScalarField(const MatrixXd& V, const MatrixXi& F,
   igl::slice_into(Z_in, in, meshScalar);
 }
 
-void GeoLib::computeIsoPts(const MatrixXd& V, const MatrixXi& F,
+void GeoLib::computeIsoPts(const MatrixXf& V, const MatrixXi& F,
                            const VectorXd& meshScalar, int divN,
                            map<double, MatrixXd>& isoLinePts, bool sorted) {
   double startBnd = 0.0001;

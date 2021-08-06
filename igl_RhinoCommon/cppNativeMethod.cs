@@ -26,6 +26,12 @@ namespace IGLRhinoCommon
         internal static extern void igl_adjacency_list(IntPtr F, int nF, IntPtr adjLstFromCpp, out int sz);
 
         /// <summary>
+        /// Compute mesh normal per vert, face
+        /// </summary>
+        [DllImport(Import.cppLib, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void igl_per_vertex_and_face_normals(IntPtr V, int nV, IntPtr F, int nF, IntPtr vN, IntPtr fN);
+
+        /// <summary>
         /// Compute mesh boundary loop
         /// </summary>
         [DllImport(Import.cppLib, CallingConvention = CallingConvention.Cdecl)]

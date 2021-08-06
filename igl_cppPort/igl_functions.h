@@ -23,18 +23,26 @@
 
 #endif
 
-void convertArrayToEigenXd(float* inputArray, int sz,
-                           Eigen::MatrixXd& outputEigen);
+void convertArrayToEigenXf(float* inputArray, int sz,
+                           Eigen::MatrixXf& outputEigen);
 void convertArrayToEigenXi(int* inputArray, int sz,
                            Eigen::MatrixXi& outputEigen);
 
 extern "C" __declspec(dllimport) double Add(double a, double b);
 
+//-----------------------------------------------
+// Mesh Basics
+//-----------------------------------------------
 RH_C_FUNCTION
 void igl_adjacency_list(int* F, int nF, int* adjLst, int& sz);
 
 RH_C_FUNCTION
 void igl_boundary_loop(int* F, int nF, int* adjLst, int& sz);
+
+// ! Normals
+RH_C_FUNCTION
+void igl_per_vertex_and_face_normals(float* V, int nV, int* F, int nF,
+                                     float* vN, float* fN);
 
 RH_C_FUNCTION
 void extractIsoLinePts(float* V, int nV, int* F, int nF, int* con_idx,

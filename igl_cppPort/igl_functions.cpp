@@ -4,6 +4,8 @@
 #include <igl/adjacency_list.h>
 #include <igl/boundary_loop.h>
 #include <igl/parula.h>
+#include <igl/per_corner_normals.h>
+#include <igl/per_vertex_normals.h>
 
 #include <numeric>
 
@@ -12,9 +14,12 @@
 using namespace std;
 using namespace Eigen;
 
+typedef Matrix<float, Dynamic, Dynamic, RowMajor> RowMajMatXf;
+typedef Matrix<int, Dynamic, Dynamic, RowMajor> RowMajMatXi;
+
 // helper function
-void convertArrayToEigenXd(float* inputArray, int sz,
-                           Eigen::MatrixXd& outputEigen) {
+void convertArrayToEigenXf(float* inputArray, int sz,
+                           Eigen::MatrixXf& outputEigen) {
   int cnt = 0;
   outputEigen.resize(sz, 3);
 
@@ -97,7 +102,24 @@ void igl_boundary_loop(int* F, int nF, int* adjLst, int& sz) {
                                     });
 }
 
-// RH_C_FUNCTION
+void igl_per_vertex_and_face_normals(float* V, int nV, int* F, int nF,
+                                     float* vN, float* fN) {
+  Eigen::MatrixXi eF;
+  Eigen::MatrixXf eV;
+  convertArrayToEigenXf(V, nV, eV);
+  convertArrayToEigenXi(F, nF, eF);
+
+  Eigen::MatrixXf vertN, faceN;
+  igl::per_face_normals(eV, eF, faceN);
+  igl::per_vertex_normals(eV, eF,
+                          igl::PerVertexNormalsWeightingType::
+                              PER_VERTEX_NORMALS_WEIGHTING_TYPE_DEFAULT,
+                          faceN, vertN);
+
+  RowMajMatXf::Map(vN, vertN.rows(), vertN.cols()) = vertN;
+  RowMajMatXf::Map(fN, faceN.rows(), faceN.cols()) = faceN;
+}
+
 void extractIsoLinePts(float* V, int nV, int* F, int nF, int* con_idx,
                        double* con_value, int numCon, int divN,
                        double* isoLnPts, int* numPtsPerLst) {
@@ -105,9 +127,9 @@ void extractIsoLinePts(float* V, int nV, int* F, int nF, int* con_idx,
   // "isoLnPts' in each isoline
 
   // convert mesh
-  MatrixXd eigenV;
+  MatrixXf eigenV;
   MatrixXi eigenF;
-  convertArrayToEigenXd(V, nV, eigenV);
+  convertArrayToEigenXf(V, nV, eigenV);
   convertArrayToEigenXi(F, nF, eigenF);
 
   // convert constraints
@@ -150,16 +172,15 @@ void extractIsoLinePts(float* V, int nV, int* F, int nF, int* con_idx,
             numPtsPerLst);
 }
 
-// RH_C_FUNCTION
 void computeLaplacian(float* V, int nV, int* F, int nF, int* con_idx,
                       double* con_value, int numCon, float* laplacianValue) {
   // size of 'numPtsPerLst'  =  divN;  "numPtsPerLst" contains the # of pts of
   // "isoLnPts' in each isoline
 
   // convert mesh
-  MatrixXd eigenV;
+  MatrixXf eigenV;
   MatrixXi eigenF;
-  convertArrayToEigenXd(V, nV, eigenV);
+  convertArrayToEigenXf(V, nV, eigenV);
   convertArrayToEigenXi(F, nF, eigenF);
 
   // convert constraints

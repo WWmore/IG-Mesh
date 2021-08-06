@@ -68,10 +68,10 @@ struct MeshStat {
   }
 };
 
-void solveScalarField(const MatrixXd& V, const MatrixXi& F,
+void solveScalarField(const MatrixXf& V, const MatrixXi& F,
                       const VectorXi& con_idx, const VectorXd& con_value,
                       VectorXd& meshScalar);
-void computeIsoPts(const MatrixXd& V, const MatrixXi& F,
+void computeIsoPts(const MatrixXf& V, const MatrixXi& F,
                    const VectorXd& meshScalar, int divN,
                    map<double, MatrixXd>& isoLinePts, bool sorted = true);
 }  // namespace GeoLib

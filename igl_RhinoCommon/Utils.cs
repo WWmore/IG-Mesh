@@ -8,6 +8,9 @@ namespace IGLRhinoCommon
 {
     public static class Utils
     {
+
+        static int memSzFloat = Marshal.SizeOf(typeof(float));
+        static int memSzInt = Marshal.SizeOf(typeof(int));
         /// <summary>
         /// Sums two numbers
         /// </summary>
@@ -58,7 +61,6 @@ namespace IGLRhinoCommon
                 adjLst.Add(transferLst);
             }
 
-            // compute from cpp side.
             return adjLst;
         }
         public static List<List<int>> getBoundaryLoop(ref Mesh rhinoMesh)
@@ -76,7 +78,7 @@ namespace IGLRhinoCommon
             Marshal.Copy(F, 0, meshF, F.Length);
 
             // assume each vert has most 10 neighbours
-            IntPtr boundLoopFromCpp = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(int)) * numEle);
+            IntPtr boundLoopFromCpp = Marshal.AllocHGlobal(memSzInt * numEle);
 
             // call the c++ func
             int sz;
@@ -108,6 +110,59 @@ namespace IGLRhinoCommon
             return boundLoop;
 
         }
+
+        public static void getPerVertFaceNormal(in Mesh rhinoMesh, out List<Vector3f> outVN, out List<Vector3f> outFN)
+        {
+            if (rhinoMesh == null) throw new ArgumentNullException(nameof(rhinoMesh));
+
+            // initialize the pointer and pass data
+            int nV = rhinoMesh.Vertices.Count;
+            int nF = rhinoMesh.Faces.Count;
+
+            // copy data into the IntPtr
+            float[] V = rhinoMesh.Vertices.ToFloatArray();
+            int[] F = rhinoMesh.Faces.ToIntArray(true);
+
+            IntPtr meshV = Marshal.AllocHGlobal(memSzFloat * V.Length);
+            IntPtr meshF = Marshal.AllocHGlobal(memSzInt * F.Length);
+
+            Marshal.Copy(V, 0, meshV, V.Length);
+            Marshal.Copy(F, 0, meshF, F.Length);
+
+            // assume each vert has most 10 neighbours
+            IntPtr vNcpp = Marshal.AllocHGlobal(memSzFloat * nV * 3);
+            IntPtr fNcpp = Marshal.AllocHGlobal(memSzFloat * nF * 3);
+
+            // call the c++ func
+            CppIGL.igl_per_vertex_and_face_normals(meshV, nV, meshF, nF, vNcpp, fNcpp);
+
+            // store data
+            float[] vnArray = new float[3 * nV];
+            float[] fnArray = new float[3 * nF];
+            Marshal.Copy(vNcpp, vnArray, 0, 3 * nV);
+            Marshal.Copy(fNcpp, fnArray, 0, 3 * nF);
+
+            // free memory
+            Marshal.FreeHGlobal(meshV);
+            Marshal.FreeHGlobal(meshF);
+            Marshal.FreeHGlobal(vNcpp);
+            Marshal.FreeHGlobal(fNcpp);
+
+            // copy to output data structure
+            outVN = new List<Vector3f>();
+            outFN = new List<Vector3f>();
+
+            for (int i = 0; i < nV; i++)
+            {
+                outVN.Add(new Vector3f(vnArray[i * 3], vnArray[i * 3 + 1], vnArray[i * 3 + 2]));
+            }
+
+            for (int i = 0; i < nF; i++)
+            {
+                outFN.Add(new Vector3f(fnArray[i * 3], fnArray[i * 3 + 1], fnArray[i * 3 + 2]));
+            }
+        }
+
         public static List<List<Point3d>> getIsolinePts(ref Mesh rhinoMesh, ref List<int> con_idx, ref List<double> con_val, int divN)
         {
             if (rhinoMesh == null) throw new ArgumentNullException(nameof(rhinoMesh));
@@ -203,7 +258,8 @@ namespace IGLRhinoCommon
             Marshal.Copy(laplacianValue, processedScalarValue, 0, nV);
 
             List<float> laplacianV = new List<float>();
-            for (int i = 0; i < nV; i++) {
+            for (int i = 0; i < nV; i++)
+            {
                 laplacianV.Add(processedScalarValue[i]);
             }
 
